@@ -263,6 +263,16 @@ public class OrderProcessingBean {
     }
 
     /**
+     * Finds all orders.
+     *
+     * @return list of all orders, ordered by newest first
+     */
+    public List<Order> findAllOrders() {
+        return em.createQuery("SELECT o FROM Order o ORDER BY o.createdAt DESC", Order.class)
+                 .getResultList();
+    }
+
+    /**
      * Finds all orders placed by a specific customer.
      * Used for the Order History UI.
      *

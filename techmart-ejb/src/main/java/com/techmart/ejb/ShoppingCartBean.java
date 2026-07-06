@@ -7,6 +7,7 @@ import com.techmart.model.Product;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.*;
+import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
@@ -45,6 +46,7 @@ import java.util.logging.Logger;
  * @author TechMart Architecture Team
  * @version 1.0.0
  */
+@SessionScoped
 @Stateful
 @StatefulTimeout(value = 30, unit = java.util.concurrent.TimeUnit.MINUTES)
 @PerformanceLogged
@@ -277,25 +279,20 @@ public class ShoppingCartBean implements Serializable {
      *
      * @return the list of cart items at checkout time
      */
-    @Remove
     public List<CartItem> checkout() {
         LOGGER.log(Level.INFO,
             "Checkout initiated: session={0}, items={1}, total={2}",
             new Object[]{sessionId, cartItems.size(), getCartTotal()});
 
-        // Return a copy of the items (the bean is about to be destroyed)
-        return new ArrayList<>(cartItems.values());
+        // Return a copy of the items and clear the cart for the next order
+        List<CartItem> items = new ArrayList<>(cartItems.values());
+        cartItems.clear();
+        return items;
     }
 
-    /**
-     * Clears the cart and destroys the Stateful bean instance.
-     * Used when the user explicitly abandons their cart.
-     * {@code retainIfException = true} keeps the bean alive if clearing fails.
-     */
-    @Remove(retainIfException = true)
     public void clearAndDestroy() {
         LOGGER.log(Level.INFO,
-            "Cart cleared and destroyed: session={0}", sessionId);
+            "Cart cleared: session={0}", sessionId);
         cartItems.clear();
     }
 

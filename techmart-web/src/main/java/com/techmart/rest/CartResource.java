@@ -38,7 +38,6 @@ import java.util.logging.Logger;
  * @author TechMart Architecture Team
  * @version 1.0.0
  */
-@SessionScoped
 @Path("/cart")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -47,12 +46,8 @@ public class CartResource implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(CartResource.class.getName());
 
-    /**
-     * Stateful ShoppingCartBean — one instance per user session.
-     * The @EJB injection creates a new Stateful bean on first access
-     * and maintains the same instance for subsequent requests in the session.
-     */
-    @EJB
+    /** Stateful ShoppingCartBean managed by CDI */
+    @Inject
     private ShoppingCartBean shoppingCart;
 
     /** Stateless ProductCatalogBean for product lookups */

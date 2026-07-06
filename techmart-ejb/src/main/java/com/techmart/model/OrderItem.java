@@ -43,6 +43,7 @@ public class OrderItem implements Serializable {
     /** Parent order — this is the owning side of the bidirectional relationship */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @javax.json.bind.annotation.JsonbTransient
     private Order order;
 
     /** Reference to the product (nullable if product is deleted) */

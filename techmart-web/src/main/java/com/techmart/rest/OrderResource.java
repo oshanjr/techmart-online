@@ -78,9 +78,8 @@ public class OrderResource {
         LOGGER.log(Level.FINE, "GET /orders?status={0}", statusParam);
 
         if (statusParam == null || statusParam.trim().isEmpty()) {
-            // Return recent orders if no status filter specified
-            List<Order> orders = orderProcessingBean.findOrdersByStatus(
-                Order.OrderStatus.PENDING);
+            // Return all orders if no status filter specified
+            List<Order> orders = orderProcessingBean.findAllOrders();
             return Response.ok(orders).build();
         }
 

@@ -365,24 +365,24 @@ function updateCartUI() {
             el.className = 'cart-item';
             el.innerHTML = `
                 <div class="cart-item-details">
-                    <h4>${item.product.name}</h4>
-                    <div class="cart-item-price">$${item.product.price.toFixed(2)}</div>
+                    <h4>${item.productName}</h4>
+                    <div class="cart-item-price">$${item.unitPrice.toFixed(2)}</div>
                     <div class="qty-controls">
-                        <button class="qty-btn" onclick="updateCartItemQty(${item.product.id}, ${item.quantity - 1})">
+                        <button class="qty-btn" onclick="updateCartItemQty(${item.productId}, ${item.quantity - 1})">
                             <i data-lucide="minus" style="width: 14px; height: 14px;"></i>
                         </button>
                         <span class="qty-value">${item.quantity}</span>
-                        <button class="qty-btn" onclick="updateCartItemQty(${item.product.id}, ${item.quantity + 1})">
+                        <button class="qty-btn" onclick="updateCartItemQty(${item.productId}, ${item.quantity + 1})">
                             <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
                         </button>
                     </div>
                 </div>
                 <div class="cart-item-actions">
-                    <button class="btn-icon cart-item-remove" onclick="removeCartItem(${item.product.id})">
+                    <button class="btn-icon cart-item-remove" onclick="removeCartItem(${item.productId})">
                         <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
                     </button>
                     <div style="text-align: right; margin-top: 0.5rem; font-weight: 600;">
-                        $${item.totalPrice.toFixed(2)}
+                        $${item.subtotal.toFixed(2)}
                     </div>
                 </div>
             `;
@@ -403,7 +403,7 @@ function renderOrderHistory(orders) {
     orders.forEach(order => {
         let itemsHtml = order.items.map(item => `
             <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.25rem;">
-                <span>${item.product.name} (x${item.quantity})</span>
+                <span>${item.productName} (x${item.quantity})</span>
                 <span>$${item.subtotal.toFixed(2)}</span>
             </div>
         `).join('');

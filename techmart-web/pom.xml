@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online :: Web Module (WAR)
+  ============================================================================
+  Contains the JAX-RS REST API layer:
+    - JaxRsApplication (activator)
+    - ProductResource, CartResource, OrderResource
+    - InventoryResource, MetricsResource
+  
+  This module depends on techmart-ejb to access session beans via @EJB injection.
+  Packaging: war
+  ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.techmart</groupId>
+        <artifactId>techmart-online</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>techmart-web</artifactId>
+    <packaging>war</packaging>
+    <name>TechMart Online :: Web Module</name>
+
+    <dependencies>
+        <!-- Java EE 8 API — provided by WildFly -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+          EJB Module Dependency
+          Scope "provided" because at runtime this is co-deployed inside
+          the same EAR and resolved by the classloader hierarchy.
+        -->
+        <dependency>
+            <groupId>com.techmart</groupId>
+            <artifactId>techmart-ejb</artifactId>
+            <type>ejb</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- SLF4J Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online — Parent POM
+  ============================================================================
+  Multi-module Maven project for the TechMart e-commerce platform.
+  
+  Module Reactor Order:
+    1. techmart-ejb   — EJB module (entities, session beans, JMS, MDBs)
+    2. techmart-web   — WAR module (JAX-RS REST API)
+    3. techmart-ear   — EAR packaging (assembles EJB + WAR)
+    4. techmart-test  — Integration tests (JUnit 5 + Arquillian)
+  
+  Target Runtime: WildFly 18+ / Java EE 8
+  Database:       PostgreSQL 12+
+  ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.techmart</groupId>
+    <artifactId>techmart-online</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>TechMart Online :: Parent</name>
+    <description>
+        Enterprise e-commerce platform built on Java EE 8.
+        Designed for 10,000+ concurrent users with sub-second response times.
+    </description>
+
+    <!-- ================================================================== -->
+    <!-- Module Reactor Order                                                -->
+    <!-- ================================================================== -->
+    <modules>
+        <module>techmart-ejb</module>
+        <module>techmart-web</module>
+        <module>techmart-ear</module>
+        <module>techmart-test</module>
+    </modules>
+
+    <!-- ================================================================== -->
+    <!-- Centralized Version Properties                                      -->
+    <!-- ================================================================== -->
+    <properties>
+        <!-- Build settings -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <!-- Java EE 8 API -->
+        <javaee-api.version>8.0.1</javaee-api.version>
+
+        <!-- Database -->
+        <postgresql.version>42.7.3</postgresql.version>
+
+        <!-- Logging -->
+        <slf4j.version>2.0.13</slf4j.version>
+
+        <!-- Testing -->
+        <junit-jupiter.version>5.10.2</junit-jupiter.version>
+        <arquillian.version>1.8.0.Final</arquillian.version>
+        <arquillian-wildfly.version>5.0.1.Final</arquillian-wildfly.version>
+        <shrinkwrap.version>3.2.1</shrinkwrap.version>
+
+        <!-- Plugins -->
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-ejb-plugin.version>3.2.1</maven-ejb-plugin.version>
+        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
+        <maven-ear-plugin.version>3.3.0</maven-ear-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+    </properties>
+
+    <!-- ================================================================== -->
+    <!-- Dependency Management (Bill of Materials)                           -->
+    <!-- ================================================================== -->
+    <dependencyManagement>
+        <dependencies>
+            <!--
+              Java EE 8 API — Provided by the application server at runtime.
+              This single dependency covers EJB, JPA, JMS, JAX-RS, CDI, etc.
+            -->
+            <dependency>
+                <groupId>javax</groupId>
+                <artifactId>javaee-api</artifactId>
+                <version>${javaee-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- PostgreSQL JDBC Driver — Used by the datasource at runtime -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- SLF4J Logging Facade -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- ======================================================== -->
+            <!-- Internal Module Dependencies                              -->
+            <!-- ======================================================== -->
+            <dependency>
+                <groupId>com.techmart</groupId>
+                <artifactId>techmart-ejb</artifactId>
+                <version>${project.version}</version>
+                <type>ejb</type>
+            </dependency>
+            <dependency>
+                <groupId>com.techmart</groupId>
+                <artifactId>techmart-web</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+
+            <!-- ======================================================== -->
+            <!-- Testing Dependencies                                      -->
+            <!-- ======================================================== -->
+
+            <!-- JUnit 5 BOM -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Arquillian BOM -->
+            <dependency>
+                <groupId>org.jboss.arquillian</groupId>
+                <artifactId>arquillian-bom</artifactId>
+                <version>${arquillian.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Arquillian JUnit 5 Integration -->
+            <dependency>
+                <groupId>org.jboss.arquillian.junit5</groupId>
+                <artifactId>arquillian-junit5-container</artifactId>
+                <version>${arquillian.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- WildFly Managed Container for Arquillian -->
+            <dependency>
+                <groupId>org.wildfly.arquillian</groupId>
+                <artifactId>wildfly-arquillian-container-managed</artifactId>
+                <version>${arquillian-wildfly.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- ShrinkWrap for programmatic archive creation in tests -->
+            <dependency>
+                <groupId>org.jboss.shrinkwrap.resolver</groupId>
+                <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+                <version>${shrinkwrap.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ================================================================== -->
+    <!-- Build Plugin Configuration                                          -->
+    <!-- ================================================================== -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Java Compiler — Target Java 11 for EE 8 compatibility -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+
+                <!-- EJB Plugin — Produces EJB 3.2 JARs -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-ejb-plugin</artifactId>
+                    <version>${maven-ejb-plugin.version}</version>
+                    <configuration>
+                        <ejbVersion>3.2</ejbVersion>
+                    </configuration>
+                </plugin>
+
+                <!-- WAR Plugin — No web.xml requirement (JAX-RS uses annotations) -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${maven-war-plugin.version}</version>
+                    <configuration>
+                        <failOnMissingWebXml>false</failOnMissingWebXml>
+                    </configuration>
+                </plugin>
+
+                <!-- EAR Plugin — Packages EJB + WAR into enterprise archive -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-ear-plugin</artifactId>
+                    <version>${maven-ear-plugin.version}</version>
+                </plugin>
+
+                <!-- Surefire — Unit tests -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+
+                <!-- Failsafe — Integration tests -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online :: EJB Module
+  ============================================================================
+  Contains all server-side business logic:
+    - JPA Entities (Product, Order, Inventory, Warehouse)
+    - Session Beans (Stateless, Stateful, Singleton)
+    - JMS Message Producers
+    - Message-Driven Beans (MDBs)
+    - CDI Interceptors (Performance Monitoring)
+  
+  Packaging: ejb (produces a .jar with EJB descriptor)
+  ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.techmart</groupId>
+        <artifactId>techmart-online</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>techmart-ejb</artifactId>
+    <packaging>ejb</packaging>
+    <name>TechMart Online :: EJB Module</name>
+
+    <dependencies>
+        <!--
+          Java EE 8 API — "provided" scope because WildFly supplies this at runtime.
+          Covers: EJB 3.2, JPA 2.2, JMS 2.0, CDI 2.0, Bean Validation 2.0, etc.
+        -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- SLF4J for structured logging (WildFly bundles the implementation) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ejb-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online — Arquillian Configuration
+  ============================================================================
+  Configures the Arquillian testing framework to use a WildFly managed
+  container for integration tests.
+  
+  "Managed" means Arquillian will:
+    1. Start WildFly automatically before tests
+    2. Deploy the test archive
+    3. Run tests inside the container
+    4. Undeploy and stop WildFly after tests
+  
+  Prerequisites:
+    - JBOSS_HOME environment variable set to the WildFly installation directory
+    - OR set the jbossHome property below to an absolute path
+    - PostgreSQL running with techmart_db database created
+    - WildFly configured with the TechMart datasource and JMS queues
+      (see config/wildfly-standalone-snippet.xml)
+  ============================================================================
+-->
+<arquillian xmlns="http://jboss.org/schema/arquillian"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://jboss.org/schema/arquillian
+                                http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
+
+    <!--
+      Default Protocol: Servlet 5.0
+      This determines how Arquillian communicates with the container.
+      Servlet protocol is the standard for Java EE containers.
+    -->
+    <defaultProtocol type="Servlet 5.0"/>
+
+    <!--
+      WildFly Managed Container Configuration
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      The container adapter starts and stops WildFly around the test suite.
+    -->
+    <container qualifier="wildfly-managed" default="true">
+        <configuration>
+            <!--
+              WildFly Installation Path.
+              Uses the JBOSS_HOME environment variable by default.
+              Uncomment and set jbossHome if you prefer an explicit path:
+              <property name="jbossHome">/path/to/wildfly</property>
+            -->
+
+            <!--
+              Server Configuration File.
+              Use standalone-full.xml to include the messaging subsystem
+              (required for JMS queues and topics).
+            -->
+            <property name="serverConfig">standalone-full.xml</property>
+
+            <!--
+              JVM Arguments for the WildFly Server.
+              - Memory: 512MB min, 1GB max (sufficient for testing)
+              - MetaspaceSize: 256MB for class metadata
+              - AggressiveOpts: JIT optimizations
+            -->
+            <property name="javaVmArguments">
+                -Xms512m -Xmx1024m -XX:MetaspaceSize=256m
+                -Djava.net.preferIPv4Stack=true
+            </property>
+
+            <!--
+              Management Port.
+              Default 9990 — change if running multiple WildFly instances.
+            -->
+            <property name="managementPort">9990</property>
+
+            <!--
+              Startup Timeout.
+              Maximum time (in seconds) to wait for WildFly to start.
+              Increase if running on slower hardware or CI/CD.
+            -->
+            <property name="startupTimeoutInSeconds">120</property>
+
+            <!--
+              Output to Console.
+              Set to true to see WildFly server output during test runs.
+              Useful for debugging, noisy for CI/CD.
+            -->
+            <property name="outputToConsole">true</property>
+
+            <!--
+              Allow connecting to a running instance.
+              If true and WildFly is already running, Arquillian will use
+              the existing instance instead of starting a new one.
+            -->
+            <property name="allowConnectingToRunningServer">true</property>
+        </configuration>
+    </container>
+
+</arquillian>

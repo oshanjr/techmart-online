@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TechMart - The premium tech e-commerce experience.">
+    <title>TechMart | Premium Tech Store</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand">
+                <i data-lucide="cpu" class="brand-icon"></i>
+                TechMart
+            </a>
+            <div class="nav-links">
+                <a href="#products">Products</a>
+                <a href="#" id="nav-order-history">Order History</a>
+                <a href="admin.html" target="_blank">Admin Portal</a>
+            </div>
+            <div class="nav-actions">
+                <button id="cart-toggle" class="btn-icon cart-btn">
+                    <i data-lucide="shopping-bag"></i>
+                    <span id="cart-badge" class="cart-badge hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Experience The Future of Tech</h1>
+            <p>Discover our curated collection of premium gadgets, high-performance hardware, and smart devices designed for the modern lifestyle.</p>
+            <a href="#products" class="btn-primary">Shop Now</a>
+        </div>
+        <div class="hero-glow"></div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Products Section -->
+        <section id="products" class="section">
+            <div class="section-header">
+                <h2>Our Catalog</h2>
+                <div class="filters">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="Laptops">Laptops</button>
+                    <button class="filter-btn" data-category="Smartphones">Smartphones</button>
+                    <button class="filter-btn" data-category="Accessories">Accessories</button>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loading-spinner" class="spinner-container">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="grid hidden">
+                <!-- Product cards will be injected here by JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h3>Your Cart</h3>
+            <button id="cart-close" class="btn-icon"><i data-lucide="x"></i></button>
+        </div>
+        
+        <div id="cart-items" class="cart-items">
+            <!-- Cart items will be injected here -->
+            <div class="empty-cart-message">Your cart is empty.</div>
+        </div>
+        
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span id="cart-total-price">$0.00</span>
+            </div>
+            <button id="checkout-btn" class="btn-primary full-width" disabled>Proceed to Checkout</button>
+        </div>
+    </div>
+    <div id="cart-overlay" class="overlay"></div>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h2>Complete Your Order</h2>
+                <button id="modal-close" class="btn-icon"><i data-lucide="x"></i></button>
+            </div>
+            <form id="checkout-form" class="checkout-form">
+                <div class="form-group">
+                    <label for="customerName">Full Name</label>
+                    <input type="text" id="customerName" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">Email Address</label>
+                    <input type="email" id="customerEmail" required placeholder="john@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="shippingAddress">Shipping Address</label>
+                    <textarea id="shippingAddress" required placeholder="123 Main St, City, State 12345" rows="3"></textarea>
+                </div>
+                
+                <div class="checkout-summary">
+                    <div class="summary-row">
+                        <span>Items:</span>
+                        <span id="checkout-item-count">0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="checkout-total">$0.00</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary full-width mt-4" id="submit-order-btn">Place Order</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Single Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>Product Details</h2>
+                <button id="product-modal-close" class="btn-icon"><i data-lucide="x"></i></button>
+            </div>
+            <div class="product-details-container" style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                <div id="sp-image-container" style="flex: 1; min-width: 300px; display: flex; align-items: center; justify-content: center; background: var(--bg-surface-elevated); border-radius: 12px; padding: 2rem; overflow: hidden;">
+                    <i data-lucide="box" style="width: 150px; height: 150px; color: var(--accent-primary); opacity: 0.5;"></i>
+                </div>
+                <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: center;">
+                    <div id="sp-category" class="product-category">Category</div>
+                    <h1 id="sp-title" style="font-size: 2rem; margin-bottom: 1rem; line-height: 1.2;">Product Name</h1>
+                    <div id="sp-sku" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">SKU: ...</div>
+                    <p id="sp-desc" class="product-desc" style="font-size: 1rem; margin-bottom: 2rem;">Product Description...</p>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto;">
+                        <span id="sp-price" class="product-price" style="font-size: 2rem;">$0.00</span>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <span id="sp-stock" style="color: var(--text-secondary); font-size: 0.9rem;">Stock: 0</span>
+                            <button id="sp-add-to-cart" class="btn-primary">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order History Modal -->
+    <div id="order-history-modal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Order History</h2>
+                <button id="order-modal-close" class="btn-icon"><i data-lucide="x"></i></button>
+            </div>
+            <div class="form-group" style="display: flex; gap: 1rem;">
+                <input type="email" id="order-search-email" placeholder="Enter your email to view past orders" style="flex: 1;">
+                <button id="btn-search-orders" class="btn-primary">Search</button>
+            </div>
+            
+            <div id="order-history-loading" class="spinner-container hidden">
+                <div class="spinner"></div>
+            </div>
+
+            <div id="order-history-results" style="margin-top: 1.5rem; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Order results will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content glass-panel text-center">
+            <div class="success-icon-container">
+                <i data-lucide="check-circle" class="success-icon"></i>
+            </div>
+            <h2>Order Placed Successfully!</h2>
+            <p id="success-message">Thank you for your purchase. We are processing your order asynchronously.</p>
+            <button id="success-close-btn" class="btn-primary mt-4">Continue Shopping</button>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">
+        <span id="toast-message">Notification</span>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

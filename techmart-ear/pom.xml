@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online :: EAR Module
+  ============================================================================
+  Packages the EJB and WAR modules into a single Enterprise Archive (.ear)
+  for deployment to WildFly.
+  
+  The EAR structure at build time:
+    techmart-online.ear
+    ├── techmart-ejb-1.0.0-SNAPSHOT.jar   (EJB module)
+    ├── techmart-web-1.0.0-SNAPSHOT.war   (Web module)
+    ├── lib/                               (shared libraries)
+    └── META-INF/
+        └── application.xml               (auto-generated)
+  ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.techmart</groupId>
+        <artifactId>techmart-online</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>techmart-ear</artifactId>
+    <packaging>ear</packaging>
+    <name>TechMart Online :: EAR Module</name>
+
+    <dependencies>
+        <!-- EJB module to include in the EAR -->
+        <dependency>
+            <groupId>com.techmart</groupId>
+            <artifactId>techmart-ejb</artifactId>
+            <type>ejb</type>
+        </dependency>
+
+        <!-- WAR module to include in the EAR -->
+        <dependency>
+            <groupId>com.techmart</groupId>
+            <artifactId>techmart-web</artifactId>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <configuration>
+                    <!-- Java EE 8 application descriptor version -->
+                    <version>8</version>
+                    <!-- Disable default library bundling to reduce archive size -->
+                    <defaultLibBundleDir>lib</defaultLibBundleDir>
+                    <modules>
+                        <!-- EJB Module Configuration -->
+                        <ejbModule>
+                            <groupId>com.techmart</groupId>
+                            <artifactId>techmart-ejb</artifactId>
+                            <bundleFileName>techmart-ejb.jar</bundleFileName>
+                        </ejbModule>
+                        <!-- WAR Module Configuration -->
+                        <webModule>
+                            <groupId>com.techmart</groupId>
+                            <artifactId>techmart-web</artifactId>
+                            <bundleFileName>techmart-web.war</bundleFileName>
+                            <!-- Context root for the web application -->
+                            <contextRoot>/techmart</contextRoot>
+                        </webModule>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,63 @@
+/* Admin Specific Styles */
+.admin-view {
+    display: none;
+}
+.admin-view.active {
+    display: block;
+}
+
+.login-card {
+    max-width: 400px;
+    margin: 10vh auto;
+}
+
+.dashboard-tab {
+    display: none;
+}
+.dashboard-tab.active {
+    display: block;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-surface);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+}
+
+.admin-table th, .admin-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.admin-table th {
+    background: var(--bg-surface-elevated);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-table td {
+    color: var(--text-primary);
+}
+
+.action-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tab-link.active {
+    color: var(--accent-primary) !important;
+}
+.tab-link.active::after {
+    width: 100% !important;
+}

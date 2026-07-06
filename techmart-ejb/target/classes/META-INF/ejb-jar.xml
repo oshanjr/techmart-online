@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online — EJB Deployment Descriptor (ejb-jar.xml)
+  ============================================================================
+  While TechMart primarily uses annotations for EJB configuration, this
+  descriptor serves two purposes:
+  
+  1. Documents the JNDI binding strategy for all session beans
+  2. Configures interceptor bindings that supplement annotation-based config
+  3. Provides timeout policies for async methods
+  
+  JNDI BINDING STRATEGY:
+  =====================
+  WildFly automatically assigns JNDI names to EJBs following this pattern:
+  
+    Global:  java:global/<app-name>/<module-name>/<bean-name>[!<interface>]
+    App:     java:app/<module-name>/<bean-name>[!<interface>]
+    Module:  java:module/<bean-name>[!<interface>]
+  
+  For TechMart, deployed as an EAR, the bindings are:
+  
+    ProductCatalogBean:
+      java:global/techmart-ear/techmart-ejb/ProductCatalogBean
+      java:app/techmart-ejb/ProductCatalogBean
+      java:module/ProductCatalogBean
+    
+    ShoppingCartBean:
+      java:global/techmart-ear/techmart-ejb/ShoppingCartBean
+      java:app/techmart-ejb/ShoppingCartBean
+      java:module/ShoppingCartBean
+    
+    AppConfigBean:
+      java:global/techmart-ear/techmart-ejb/AppConfigBean
+      java:app/techmart-ejb/AppConfigBean
+      java:module/AppConfigBean
+    
+    OrderProcessingBean:
+      java:global/techmart-ear/techmart-ejb/OrderProcessingBean
+      java:app/techmart-ejb/OrderProcessingBean
+      java:module/OrderProcessingBean
+    
+    NotificationServiceBean:
+      java:global/techmart-ear/techmart-ejb/NotificationServiceBean
+      java:app/techmart-ejb/NotificationServiceBean
+      java:module/NotificationServiceBean
+  
+  RECOMMENDED INJECTION APPROACH:
+  ==============================
+  - Use @EJB for EJB-to-EJB injection (leverages EJB proxy features)
+  - Use @Inject for CDI-managed beans (JMS producers, interceptors)
+  - Avoid explicit JNDI lookups unless absolutely necessary
+  
+  ============================================================================
+-->
+<ejb-jar xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                             http://xmlns.jcp.org/xml/ns/javaee/ejb-jar_3_2.xsd"
+         version="3.2">
+
+    <display-name>TechMart EJB Module</display-name>
+    <description>
+        Enterprise JavaBeans module containing all business logic,
+        JMS producers, and message-driven beans for the TechMart
+        e-commerce platform.
+    </description>
+
+    <!-- ================================================================== -->
+    <!-- Default Interceptor Configuration                                   -->
+    <!-- ================================================================== -->
+    <!--
+      The PerformanceInterceptor is primarily configured via the @PerformanceLogged
+      CDI interceptor binding annotation and beans.xml. This section documents
+      the binding for operational clarity.
+      
+      Interceptor execution order:
+        1. Container interceptors (security, transactions)
+        2. PerformanceInterceptor (metrics collection)
+        3. Business method execution
+    -->
+    <interceptors>
+        <interceptor>
+            <interceptor-class>com.techmart.interceptor.PerformanceInterceptor</interceptor-class>
+            <around-invoke>
+                <method-name>measurePerformance</method-name>
+            </around-invoke>
+        </interceptor>
+    </interceptors>
+
+    <!-- ================================================================== -->
+    <!-- Assembly Descriptor — Transaction and Security Policies             -->
+    <!-- ================================================================== -->
+    <assembly-descriptor>
+        <!--
+          Container Transaction Attribute Defaults.
+          All session bean methods default to REQUIRED transaction propagation.
+          This means each method:
+            - Joins an existing transaction if one is active
+            - Creates a new transaction if none exists
+            
+          This is the default behavior, but we declare it explicitly for
+          documentation and to prevent accidental changes.
+        -->
+        <container-transaction>
+            <method>
+                <ejb-name>ProductCatalogBean</ejb-name>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+        </container-transaction>
+
+        <container-transaction>
+            <method>
+                <ejb-name>ShoppingCartBean</ejb-name>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+        </container-transaction>
+
+        <container-transaction>
+            <method>
+                <ejb-name>OrderProcessingBean</ejb-name>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+        </container-transaction>
+
+        <container-transaction>
+            <method>
+                <ejb-name>AppConfigBean</ejb-name>
+                <method-name>*</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+        </container-transaction>
+    </assembly-descriptor>
+
+</ejb-jar>

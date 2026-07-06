@@ -1,0 +1,7 @@
+com\techmart\rest\InventoryResource.class
+com\techmart\rest\OrderResource.class
+com\techmart\rest\CartResource.class
+com\techmart\rest\AdminResource.class
+com\techmart\rest\JaxRsApplication.class
+com\techmart\rest\MetricsResource.class
+com\techmart\rest\ProductResource.class

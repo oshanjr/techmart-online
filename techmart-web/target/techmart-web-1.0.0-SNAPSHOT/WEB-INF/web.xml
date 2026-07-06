@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online :: Web Module Deployment Descriptor
+  ============================================================================
+  Minimal web.xml for the WAR module. Most configuration is handled via
+  annotations (@ApplicationPath, @Path, @WebFilter, etc.).
+  
+  This descriptor:
+    1. Sets the display name for admin consoles
+    2. Enables the welcome file for root URL access
+    3. Configures session timeout for Stateful EJB alignment
+  ============================================================================
+-->
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                             http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <display-name>TechMart Online REST API</display-name>
+
+    <!--
+      Session Configuration.
+      30-minute timeout matches the @StatefulTimeout on ShoppingCartBean.
+      This ensures HTTP sessions and EJB stateful sessions expire together.
+    -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <!-- Default welcome page (could serve API documentation) -->
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>

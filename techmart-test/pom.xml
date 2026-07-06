@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online :: Test Module
+  ============================================================================
+  Integration tests using JUnit 5 + Arquillian.
+  Tests are executed against a WildFly managed container that is automatically
+  started and stopped by Arquillian during the test lifecycle.
+  
+  Prerequisites:
+    - Set JBOSS_HOME environment variable pointing to a WildFly installation
+    - PostgreSQL must be running with the TechMart database created
+  ============================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.techmart</groupId>
+        <artifactId>techmart-online</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>techmart-test</artifactId>
+    <packaging>jar</packaging>
+    <name>TechMart Online :: Integration Tests</name>
+
+    <dependencies>
+        <!-- Java EE 8 API — needed for compilation of test archives -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- EJB Module — the code under test -->
+        <dependency>
+            <groupId>com.techmart</groupId>
+            <artifactId>techmart-ejb</artifactId>
+            <type>ejb</type>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ======================================================== -->
+        <!-- JUnit 5                                                    -->
+        <!-- ======================================================== -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ======================================================== -->
+        <!-- Arquillian                                                 -->
+        <!-- ======================================================== -->
+
+        <!-- Arquillian JUnit 5 integration -->
+        <dependency>
+            <groupId>org.jboss.arquillian.junit5</groupId>
+            <artifactId>arquillian-junit5-container</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- WildFly Managed Container Adapter -->
+        <dependency>
+            <groupId>org.wildfly.arquillian</groupId>
+            <artifactId>wildfly-arquillian-container-managed</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ShrinkWrap Maven Resolver — resolves Maven artifacts for test archives -->
+        <dependency>
+            <groupId>org.jboss.shrinkwrap.resolver</groupId>
+            <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Use Failsafe for integration tests (IT suffix pattern) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Also run tests with Surefire for standard *Test classes -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Arquillian needs the JBOSS_HOME system property -->
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>
+                            org.jboss.logmanager.LogManager
+                        </java.util.logging.manager>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

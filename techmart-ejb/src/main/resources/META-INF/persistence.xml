@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online — JPA Persistence Configuration
+  ============================================================================
+  Defines the "TechMartPU" persistence unit that manages all JPA entities.
+  
+  Key Configuration:
+    - JTA datasource (container-managed transactions)
+    - Hibernate as the JPA provider
+    - Connection pooling via WildFly datasource subsystem
+    - Second-level cache enabled for read-heavy entities
+    - DDL auto-generation for development (disable in production)
+  
+  The actual datasource (connection pool, credentials) is configured in
+  WildFly's standalone.xml. See config/wildfly-standalone-snippet.xml.
+  ============================================================================
+-->
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+
+    <persistence-unit name="TechMartPU" transaction-type="JTA">
+
+        <!--
+          JPA Provider: Hibernate (bundled with WildFly).
+          This is optional — WildFly auto-selects Hibernate if no provider is specified.
+          Explicit declaration ensures portability and clarity.
+        -->
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!--
+          JTA Datasource — References the datasource configured in WildFly's
+          standalone.xml under the <datasources> subsystem.
+          
+          The datasource handles:
+            - Connection pooling (min: 10, max: 50 connections)
+            - Connection validation and leak detection
+            - PostgreSQL-specific dialect and driver
+            
+          See: config/wildfly-standalone-snippet.xml for the full datasource definition.
+        -->
+        <jta-data-source>java:jboss/datasources/TechMartDS</jta-data-source>
+
+        <!--
+          Managed Entity Classes.
+          Explicitly listing entities for clarity and to prevent accidental
+          inclusion of test entities in production.
+        -->
+        <class>com.techmart.model.Product</class>
+        <class>com.techmart.model.Order</class>
+        <class>com.techmart.model.OrderItem</class>
+        <class>com.techmart.model.InventoryRecord</class>
+        <class>com.techmart.model.Warehouse</class>
+
+        <!-- Exclude unlisted classes to prevent unexpected entity discovery -->
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <!--
+          Shared Cache Mode: ENABLE_SELECTIVE
+          Only entities explicitly annotated with @Cacheable will be cached.
+          This gives fine-grained control over L2 cache behavior.
+        -->
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+
+        <properties>
+            <!-- ============================================================ -->
+            <!-- Hibernate Dialect (MySQL)                               -->
+            <!-- ============================================================ -->
+            <!--
+              MySQL 8+ Dialect — enables MySQL-specific SQL generation.
+            -->
+            <property name="hibernate.dialect"
+                      value="org.hibernate.dialect.MySQL8Dialect"/>
+
+            <!-- ============================================================ -->
+            <!-- DDL Generation (Development Only)                            -->
+            <!-- ============================================================ -->
+            <!--
+              "update" mode — Hibernate auto-creates/updates tables on startup.
+              ⚠ CHANGE TO "none" OR "validate" IN PRODUCTION ⚠
+              Production should use Flyway or Liquibase for schema migrations.
+            -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+
+            <!-- ============================================================ -->
+            <!-- SQL Logging (Development Only)                               -->
+            <!-- ============================================================ -->
+            <!-- Show generated SQL in the server log (disable in production) -->
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
+
+            <!-- ============================================================ -->
+            <!-- Connection Pool Tuning (via WildFly Datasource)              -->
+            <!-- ============================================================ -->
+            <!--
+              NOTE: Connection pooling is configured at the WildFly datasource
+              level, NOT here. Hibernate/JPA settings below optimize the
+              interaction with the pool.
+            -->
+
+            <!--
+              JDBC batch size — groups INSERT/UPDATE statements for efficiency.
+              20 is optimal for most e-commerce workloads. Reduces round-trips
+              for bulk order item inserts.
+            -->
+            <property name="hibernate.jdbc.batch_size" value="20"/>
+            <property name="hibernate.order_inserts" value="true"/>
+            <property name="hibernate.order_updates" value="true"/>
+            <property name="hibernate.jdbc.batch_versioned_data" value="true"/>
+
+            <!-- ============================================================ -->
+            <!-- Second-Level Cache Configuration                             -->
+            <!-- ============================================================ -->
+            <!--
+              Enables the Hibernate second-level cache using Infinispan
+              (bundled with WildFly). Dramatically reduces database load for
+              read-heavy entities like Product and Warehouse.
+            -->
+            <property name="hibernate.cache.use_second_level_cache" value="true"/>
+            <property name="hibernate.cache.use_query_cache" value="true"/>
+            <property name="hibernate.cache.region.factory_class"
+                      value="org.hibernate.cache.infinispan.InfinispanRegionFactory"/>
+
+            <!-- ============================================================ -->
+            <!-- Performance Optimizations                                    -->
+            <!-- ============================================================ -->
+
+            <!-- Default fetch size for JDBC result sets (reduces round-trips) -->
+            <property name="hibernate.jdbc.fetch_size" value="50"/>
+
+            <!--
+              Generate statistics for monitoring (accessible via JMX).
+              Enable in production for performance dashboards.
+            -->
+            <property name="hibernate.generate_statistics" value="true"/>
+
+            <!-- Prevent N+1 query problems with default batch fetch size -->
+            <property name="hibernate.default_batch_fetch_size" value="16"/>
+        </properties>
+
+    </persistence-unit>
+
+</persistence>

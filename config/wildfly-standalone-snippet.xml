@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online — WildFly Configuration Snippet
+  ============================================================================
+  This file contains the WildFly standalone.xml configuration snippets needed
+  to run the TechMart Online application. These sections should be merged into
+  your WildFly standalone-full.xml configuration.
+  
+  IMPORTANT: Use standalone-full.xml (not standalone.xml) because the full
+  profile includes the messaging subsystem required for JMS.
+  
+  Sections:
+    1. PostgreSQL Datasource with Connection Pooling
+    2. PostgreSQL JDBC Driver Module
+    3. JMS Queue and Topic Configuration (ActiveMQ Artemis)
+  
+  Prerequisites:
+    - MySQL 8+ running on localhost:3306
+    - Database "techmart_db" created
+    - MySQL JDBC driver deployed as a WildFly module
+  
+  ============================================================================
+  HOW TO APPLY:
+  
+  Option A: Manual XML editing
+    1. Stop WildFly
+    2. Merge each section below into the corresponding subsystem in
+       $WILDFLY_HOME/standalone/configuration/standalone-full.xml
+    3. Start WildFly with: standalone.bat -c standalone-full.xml
+  
+  Option B: WildFly CLI (jboss-cli.sh / jboss-cli.bat)
+    Use the CLI commands provided in comments below each section.
+  ============================================================================
+-->
+
+
+<!-- ======================================================================== -->
+<!-- SECTION 1: MySQL Datasource with Connection Pooling                  -->
+<!-- ======================================================================== -->
+<!--
+  Add this inside the <subsystem xmlns="urn:jboss:domain:datasources:6.0">
+  section of standalone-full.xml, within the <datasources> element.
+  
+  CONNECTION POOL SETTINGS (tuned for 10,000+ concurrent users):
+    - min-pool-size: 10    — pre-allocated connections for instant availability
+    - max-pool-size: 50    — upper limit to prevent MySQL overload
+    - idle-timeout: 5 min  — releases idle connections back to the pool
+    - blocking-timeout: 30s — max wait time when pool is exhausted
+    - Background validation every 60s avoids stale connection issues
+  
+  CLI equivalent:
+    /subsystem=datasources/data-source=TechMartDS:add( \
+      jndi-name="java:jboss/datasources/TechMartDS", \
+      driver-name="mysql", \
+      connection-url="jdbc:mysql://localhost:3306/techmart_db?serverTimezone=UTC", \
+      user-name="techmart_user", \
+      password="techmart_password", \
+      min-pool-size=10, \
+      max-pool-size=50, \
+      idle-timeout-minutes=5, \
+      blocking-timeout-wait-millis=30000, \
+      valid-connection-checker-class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker", \
+      exception-sorter-class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter", \
+      background-validation=true, \
+      background-validation-millis=60000)
+-->
+<datasource jndi-name="java:jboss/datasources/TechMartDS"
+            pool-name="TechMartDS"
+            enabled="true"
+            use-java-context="true"
+            statistics-enabled="true">
+
+    <!-- MySQL Connection URL -->
+    <connection-url>jdbc:mysql://localhost:3306/techmart_db?serverTimezone=UTC</connection-url>
+
+    <!-- JDBC Driver reference (must match the driver name below) -->
+    <driver>mysql</driver>
+
+    <!-- Connection Pool Configuration -->
+    <pool>
+        <!-- Minimum connections always kept open -->
+        <min-pool-size>10</min-pool-size>
+        <!-- Maximum connections (tune based on MySQL max_connections) -->
+        <max-pool-size>50</max-pool-size>
+        <!-- Pre-fill the pool at startup for faster initial response times -->
+        <prefill>true</prefill>
+        <!-- Use FIFO to spread load across all connections evenly -->
+        <use-fast-fail>true</use-fast-fail>
+    </pool>
+
+    <!-- Authentication -->
+    <security>
+        <user-name>techmart_user</user-name>
+        <password>techmart_password</password>
+    </security>
+
+    <!-- Connection Validation -->
+    <validation>
+        <!-- MySQL-specific connection checker -->
+        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
+        <!-- Validate connections in the background (not on every getConnection) -->
+        <background-validation>true</background-validation>
+        <!-- Validation interval: 60 seconds -->
+        <background-validation-millis>60000</background-validation-millis>
+        <!-- MySQL-specific exception handler -->
+        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
+    </validation>
+
+    <!-- Timeout Configuration -->
+    <timeout>
+        <!-- Release idle connections after 5 minutes -->
+        <idle-timeout-minutes>5</idle-timeout-minutes>
+        <!-- Wait up to 30 seconds for a connection when pool is exhausted -->
+        <blocking-timeout-millis>30000</blocking-timeout-millis>
+    </timeout>
+
+    <!-- Prepared Statement Cache (reduces SQL parse overhead) -->
+    <statement>
+        <prepared-statement-cache-size>100</prepared-statement-cache-size>
+        <share-prepared-statements>true</share-prepared-statements>
+    </statement>
+
+</datasource>
+
+<!--
+  MySQL JDBC Driver Module.
+  Add this to the <drivers> section within the datasources subsystem.
+  
+  Before adding this, deploy the MySQL JDBC driver as a WildFly module:
+    1. Create directory: $WILDFLY_HOME/modules/com/mysql/main/
+    2. Copy mysql-connector-java-8.0.x.jar to that directory
+    3. Create module.xml (see below)
+-->
+<driver name="mysql" module="com.mysql">
+    <driver-class>com.mysql.cj.jdbc.Driver</driver-class>
+    <xa-datasource-class>com.mysql.cj.jdbc.MysqlXADataSource</xa-datasource-class>
+</driver>
+
+<!--
+  MySQL Module Descriptor ($WILDFLY_HOME/modules/com/mysql/main/module.xml):
+  
+  <?xml version="1.0" encoding="UTF-8"?>
+  <module xmlns="urn:jboss:module:1.9" name="com.mysql">
+      <resources>
+          <resource-root path="mysql-connector-java-8.0.x.jar"/>
+      </resources>
+      <dependencies>
+          <module name="javax.api"/>
+          <module name="javax.transaction.api"/>
+      </dependencies>
+  </module>
+-->
+
+
+<!-- ======================================================================== -->
+<!-- SECTION 2: JMS Queue and Topic Configuration (ActiveMQ Artemis)           -->
+<!-- ======================================================================== -->
+<!--
+  Add these inside the <subsystem xmlns="urn:jboss:domain:messaging-activemq:13.0">
+  section, within the <server name="default"> element.
+  
+  WildFly uses ActiveMQ Artemis as its built-in JMS provider.
+  No additional software installation is required.
+  
+  CLI equivalents:
+    jms-queue add --queue-address=OrderProcessing \
+      --entries=java:/jms/queue/OrderProcessing,java:jboss/exported/jms/queue/OrderProcessing
+    
+    jms-topic add --topic-address=InventoryUpdates \
+      --entries=java:/jms/topic/InventoryUpdates,java:jboss/exported/jms/topic/InventoryUpdates
+-->
+
+<!-- ===== JMS Queue: Order Processing (Point-to-Point) ===== -->
+<!--
+  Each order message is consumed by exactly ONE MDB instance.
+  The "exported" JNDI entry allows remote JMS clients to connect.
+-->
+<jms-queue name="OrderProcessing"
+           entries="java:/jms/queue/OrderProcessing java:jboss/exported/jms/queue/OrderProcessing">
+    <durable>true</durable>
+</jms-queue>
+
+<!-- ===== JMS Topic: Inventory Updates (Publish/Subscribe) ===== -->
+<!--
+  Inventory change events are broadcast to ALL subscribers.
+  Durable subscriptions ensure no messages are lost if an MDB restarts.
+-->
+<jms-topic name="InventoryUpdates"
+           entries="java:/jms/topic/InventoryUpdates java:jboss/exported/jms/topic/InventoryUpdates"/>
+
+
+<!-- ======================================================================== -->
+<!-- SECTION 3: Optional — Address Settings for DLQ and Redelivery             -->
+<!-- ======================================================================== -->
+<!--
+  Add inside the <server name="default"> element, within <address-settings>.
+  These settings control message redelivery and dead letter queue behavior
+  for the order and inventory destinations.
+-->
+<address-setting name="jms.queue.OrderProcessing"
+                 dead-letter-address="jms.queue.DLQ"
+                 expiry-address="jms.queue.ExpiryQueue"
+                 max-delivery-attempts="5"
+                 redelivery-delay="5000"
+                 redelivery-multiplier="2.0"
+                 max-redelivery-delay="60000"
+                 max-size-bytes="104857600"
+                 page-size-bytes="10485760"
+                 address-full-policy="PAGE"/>
+
+<address-setting name="jms.topic.InventoryUpdates"
+                 dead-letter-address="jms.queue.DLQ"
+                 expiry-address="jms.queue.ExpiryQueue"
+                 max-delivery-attempts="3"
+                 redelivery-delay="2000"
+                 max-size-bytes="52428800"
+                 page-size-bytes="10485760"
+                 address-full-policy="PAGE"/>

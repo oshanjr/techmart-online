@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ============================================================================
+  TechMart Online — CDI Configuration (beans.xml)
+  ============================================================================
+  Activates CDI (Contexts and Dependency Injection) for the EJB module.
+  
+  bean-discovery-mode="all":
+    Scans ALL classes in the archive for CDI annotations.
+    This is necessary for:
+      - @ApplicationScoped JMS producers
+      - @InterceptorBinding-based performance monitoring
+      - @Inject-based dependency injection
+  
+  Interceptor Declaration:
+    Lists the CDI interceptors that should be activated.
+    Order matters — interceptors are invoked in the order listed.
+  ============================================================================
+-->
+<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                           http://xmlns.jcp.org/xml/ns/javaee/beans_2_0.xsd"
+       version="2.0"
+       bean-discovery-mode="all">
+
+    <!--
+      CDI Interceptor Registration.
+      Interceptors declared via @InterceptorBinding must also be listed here
+      to be activated. This is a CDI spec requirement (prevents accidental
+      activation of interceptors from third-party libraries).
+    -->
+    <interceptors>
+        <class>com.techmart.interceptor.PerformanceInterceptor</class>
+    </interceptors>
+
+</beans>

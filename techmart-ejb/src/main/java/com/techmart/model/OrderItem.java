@@ -49,6 +49,7 @@ public class OrderItem implements Serializable {
     /** Reference to the product (nullable if product is deleted) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
+    @javax.json.bind.annotation.JsonbTransient
     private Product product;
 
     // ========================================================================
